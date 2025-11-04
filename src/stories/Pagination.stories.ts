@@ -70,7 +70,7 @@ export const Default: Story = {
     onChange: (page: number) => console.log(page),
     size: "medium",
   },
-  render: function Pagination(args) {
+  render: function RenderPagination(args) {
     const [, setArgs] = useArgs();
 
     const onValueChange = (value: number) => {

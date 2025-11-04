@@ -29,10 +29,6 @@ const Pagination = (props: PaginationProps) => {
     disabled,
     ...rest
   } = props;
-  // const pages = Array.from(
-  //   { length: Math.ceil(totalItems / itemsPerPage) },
-  //   (_, i) => i + 1
-  // );
 
   const DOTS = "...";
 
