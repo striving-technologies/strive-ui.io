@@ -1,7 +1,7 @@
-import { useArgs } from "@storybook/preview-api";
+import { useArgs } from "storybook";
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Pagination } from "../components/Pagination";
+import { Pagination, PaginationProps } from "../components/Pagination";
 
 const meta = {
   title: "Components/Pagination",
@@ -70,7 +70,7 @@ export const Default: Story = {
     onChange: (page: number) => console.log(page),
     size: "medium",
   },
-  render: function Pagination(args) {
+  render: function Pagination(args: PaginationProps) {
     const [, setArgs] = useArgs();
 
     const onValueChange = (value: number) => {

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import React from "react";
-import { Select } from "../components/Select";
+import { Select, SelectProps } from "../components/Select";
 
 const meta = {
   title: "Components/Select",
@@ -82,7 +82,7 @@ export const Default: Story = {
     disabled: false,
     allowClear: true,
   },
-  render: function ControlledSelect(args) {
+  render: function ControlledSelect(args: SelectProps) {
     return React.createElement(
       "div",
       { style: { height: "300px", width: "300px" } },

@@ -20,10 +20,9 @@ const Select = (props: SelectProps) => {
   } = props;
   const generatedClasses = classNames({
     "stc-select": true,
-    "stc-select-size--small": size === "small",
-    "stc-select-size--large": size === "large",
-    "stc-select-disabled": disabled,
-    "stc-select-loading": loading,
+    [`stc-select-size--${size}`]: size !== "medium" && size,
+    "stc-select--disabled": disabled,
+    "stc-select--loading": loading,
     ...(className && { [className]: true }),
   });
 

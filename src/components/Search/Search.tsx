@@ -9,13 +9,14 @@ const Search = ({
   className,
   onSearch,
   searchButton,
-  isPrimary,
-  noDivider,
+  primary,
+  hideDivider,
   ...rest
 }: SearchProps) => {
   const generatedClasses = classNames({
     "stc-search": true,
-    "stc-search--no-divider": noDivider,
+    "stc-search--hide-divider": hideDivider,
+    ...(className && { [className]: true }),
   });
 
   // auto-generate an id for the input
@@ -36,7 +37,7 @@ const Search = ({
   const SearchInput = (
     <form
       role="search"
-      className={`${generatedClasses}${className ? ` ${className}` : ""}`}
+      className={generatedClasses}
       onSubmit={handleSubmit}
     >
       <label htmlFor={id}>
@@ -51,7 +52,7 @@ const Search = ({
       <Button
         type="submit"
         size={size}
-        variant={isPrimary ? "primary" : undefined}
+        variant={primary ? "primary" : undefined}
       >
         {searchButton || "Search"}
       </Button>

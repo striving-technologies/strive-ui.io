@@ -111,8 +111,7 @@ const Pagination = (props: PaginationProps) => {
 
   const generatedClasses = classNames({
     "stc-pagination": true,
-    "stc-pagination-size--small": size === "small",
-    "stc-pagination-size--large": size === "large",
+    [`stc-pagination-size--${size}`]: size !== "medium" && size,
     "stc-pagination--disabled": disabled,
     ...(className && { [className]: true }),
   });
@@ -139,7 +138,7 @@ const Pagination = (props: PaginationProps) => {
     <li>
       <span
         aria-label="Ellipsis"
-        className="stc-pagination-ellipsis"
+        className="stc-pagination__ellipsis"
       >
         •••
       </span>
@@ -151,8 +150,8 @@ const Pagination = (props: PaginationProps) => {
       <p
         aria-description="Total items."
         className={classNames({
-          "stc-pagination-total": true,
-          [`stc-pagination-total--${showTotalPosition}`]: true,
+          "stc-pagination__total": true,
+          [`stc-pagination__total--${showTotalPosition}`]: true,
         })}
       >
         {totalToShow}

@@ -1,5 +1,5 @@
 import Spinner from "./Spinner";
 
-export * from "./Spinner.type";
+export * from "./Spinner.types";
 
 export { Spinner };
