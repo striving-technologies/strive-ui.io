@@ -8,7 +8,7 @@ const Button = ({
   shape = undefined,
   disabled = false,
   children,
-  className = "",
+  className,
   danger = false,
   icon = undefined,
   iconPosition = "left",
@@ -33,6 +33,7 @@ const Button = ({
     [`stc-button__loader--${loadingIconPosition}`]: loadingIconPosition,
     [`stc-button__icon--${iconPosition}`]: iconPosition,
     "stc-button--borderless": borderless,
+    ...(className && { [className]: true }),
   });
 
   const renderLoadingIcon = () => {
@@ -69,7 +70,7 @@ const Button = ({
 
   const ButtonGenerated = (
     <button
-      className={`${generatedClasses}${className ? ` ${className}` : ""}`}
+      className={generatedClasses}
       onClick={onClick}
       disabled={disabled}
       aria-disabled={disabled || loading}

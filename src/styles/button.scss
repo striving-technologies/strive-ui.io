@@ -43,7 +43,7 @@
     /* Button styles */
     background: none;
     border: solid 1px var(--stc-secondary-color);
-    border-radius: var(--stc-border-radius);
+    border-radius: var(--stc-button--border-radius);
     color: var(--stc-button--text-color);
     cursor: pointer;
     display: inline-block;
@@ -65,7 +65,7 @@
     &:active {
       border-color: var(--stc-primary-color);
       color: var(--stc-primary-color);
-      box-shadow: var(--stc-box-shadow);
+      box-shadow: var(--stc-button--box-shadow);
     }
 
     /* Focus */
@@ -75,9 +75,9 @@
 
     /* Disabled */
     &:disabled {
-      background-color: var(--stc-disabled-bg-color);
+      background-color: var(--stc-button--disabled-bg-color);
       border-color: var(--stc-secondary-color);
-      color: var(--stc-disabled-text-color);
+      color: var(--stc-button--disabled-text-color);
       cursor: not-allowed;
       opacity: 0.5;
       box-shadow: none;
@@ -112,9 +112,9 @@
       }
 
       &:disabled {
-        background-color: var(--stc-disabled-bg-color--primary);
-        border-color: var(--stc-disabled-bg-color--primary);
-        color: var(--stc-disabled-text-color--primary);
+        background-color: var(--stc-button--disabled-bg-color--primary);
+        border-color: var(--stc-button--disabled-bg-color--primary);
+        color: var(--stc-button--disabled-text-color--primary);
       }
 
       /* Primary and Danger styles */
@@ -222,7 +222,7 @@
 
       &:disabled {
         background: none;
-        color: var(--stc-disabled-text-color);
+        color: var(--stc-button--disabled-text-color);
       }
 
       &.stc-button--danger {

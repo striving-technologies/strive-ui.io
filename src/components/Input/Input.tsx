@@ -10,6 +10,8 @@ const Input = ({
   borderless,
   inputRef,
   htmlSize,
+  prefix,
+  suffix,
   ...rest
 }: InputProps) => {
   const inputContext = useContext(InputContext);
@@ -22,19 +24,20 @@ const Input = ({
     "stc-input": true,
     [`stc-input-size--${size}`]: size !== "medium" && size,
     "stc-input--borderless": borderless,
-    "stc-input__wrapper": rest.prefix || rest.suffix || showStepButtons,
+    "stc-input__wrapper": prefix || suffix || showStepButtons,
+    ...(className && { [className]: true }),
   });
 
   let InputGenerated: JSX.Element = (
     <input
-      className={`${generatedClasses}${className ? ` ${className}` : ""}`}
+      className={generatedClasses}
       {...(htmlSize ? { size: htmlSize } : {})}
       {...rest}
       {...(inputRef ? { ref: inputRef } : {})}
     />
   );
 
-  if (rest.prefix || rest.suffix || showStepButtons) {
+  if (prefix || suffix || showStepButtons) {
     const moveFocus = (e: MouseEvent<HTMLDivElement>) => {
       if (window.getSelection()?.toString() !== "") {
         return;
@@ -47,16 +50,16 @@ const Input = ({
 
     InputGenerated = (
       <div
-        className={`${generatedClasses}${className ? ` ${className}` : ""}`}
+        className={generatedClasses}
         onClick={moveFocus}
       >
-        {rest.prefix && <p className="stc-input__prefix">{rest.prefix}</p>}
+        {prefix && <p className="stc-input__prefix">{prefix}</p>}
         <input
           {...rest}
           {...(inputRef ? { ref: inputRef } : {})}
         />
         {showStepButtons && <StepButtons />}
-        {rest.suffix && <p className="stc-input__suffix">{rest.suffix}</p>}
+        {suffix && <p className="stc-input__suffix">{suffix}</p>}
       </div>
     );
   }

@@ -27,9 +27,9 @@
     width: 100%;
     max-width: 100%;
     border: 1px solid var(--stc-secondary-color);
-    border-radius: var(--stc-border-radius);
+    border-radius: var(--stc-select--border-radius);
     background-color: var(--stc-background-color);
-    color: var(--stc-text-color);
+    color: var(--stc-select--text-color);
     font-size: var(--stc-font-size-m);
     line-height: 1;
     cursor: pointer;
@@ -44,14 +44,14 @@
     &:focus,
     &:focus-within {
       border-color: var(--stc-primary-color);
-      box-shadow: var(--stc-box-shadow);
+      box-shadow: var(--stc-select--box-shadow);
     }
 
     /* Disabled */
-    &.stc-select-disabled {
-      background-color: var(--stc-disabled-bg-color);
+    &.stc-select--disabled {
+      background-color: var(--stc-select--disabled-bg-color);
       border-color: var(--stc-secondary-color);
-      color: var(--stc-disabled-text-color);
+      color: var(--stc-select--disabled-text-color);
       cursor: not-allowed;
 
       .stc-select__trigger {
@@ -98,7 +98,7 @@
     }
 
     .stc-select__placeholder {
-      color: var(--stc-disabled-text-color);
+      color: var(--stc-select--disabled-text-color);
       opacity: 0.75;
       font-size: var(--stc-font-size-m);
       line-height: 1;
@@ -151,7 +151,7 @@
         border-radius: 0.15rem;
 
         &:hover {
-          background-color: var(--stc-disabled-bg-color);
+          background-color: var(--stc-select--disabled-bg-color);
         }
       }
     }
@@ -195,7 +195,7 @@
 
       .stc-select__clear {
         cursor: pointer;
-        color: var(--stc-text-color);
+        color: var(--stc-select--text-color);
         font-size: 1rem;
         border-radius: 100%;
         transition: color var(--stc-select--transition);
@@ -207,7 +207,7 @@
 
         &:hover {
           color: var(--stc-primary-color);
-          background-color: var(--stc-disabled-bg-color);
+          background-color: var(--stc-select--disabled-bg-color);
         }
 
         &:focus-visible {
@@ -226,7 +226,7 @@
     .stc-select__dropdown {
       position: absolute;
       border: 1px solid var(--stc-secondary-color);
-      border-radius: var(--stc-border-radius);
+      border-radius: var(--stc-select--border-radius);
       top: 0;
       right: 0;
       left: 0;
@@ -239,14 +239,14 @@
       margin: 0;
       margin-top: 0.5rem;
       list-style: none;
-      color: var(--stc-text-color);
+      color: var(--stc-select--text-color);
       cursor: pointer;
       transform: scale(1, 0);
       transform-origin: top left;
       transition: var(--stc-select--transition);
       transition-duration: 0.1s;
       z-index: 2;
-      box-shadow: var(--stc-box-shadow);
+      box-shadow: var(--stc-select--box-shadow);
       visibility: hidden;
 
       &::-webkit-scrollbar {

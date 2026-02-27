@@ -1,4 +1,4 @@
-import { SpinnerProps } from "./Spinner.type";
+import { SpinnerProps } from "./Spinner.types";
 
 const Spinner = ({ size = "medium", spinSpeed = 5 }: SpinnerProps) => {
   return (

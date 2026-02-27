@@ -10,7 +10,7 @@ export type InputType =
   | "url"
   | "search";
 
-export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix"> {
   type: InputType;
   size?: DefaultComponentSize;
   htmlSize?: number;
@@ -20,12 +20,12 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
   inputRef?: React.RefObject<HTMLInputElement>;
   min?: number;
   max?: number;
-};
+}
 
-export type CurrencyInputProps = Omit<InputProps, "onChange" | "type"> & {
+export interface CurrencyInputProps extends Omit<InputProps, "onChange" | "type"> {
   value?: number;
   onCurrencyChange: (value: number) => void;
   thousandSeparator?: string;
   decimalSeparator?: string;
   decimalPlaces?: number;
-};
+}

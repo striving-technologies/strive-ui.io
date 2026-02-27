@@ -6,7 +6,7 @@ export type ButtonIconPositionType = "left" | "right";
 export type ButtonVariantType = "primary" | "dashed" | "link" | "text";
 export type ButtonShapeType = "circle" | "pill";
 
-export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;
   variant?: ButtonVariantType;
   shape?: ButtonShapeType;
@@ -22,4 +22,4 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   href?: string;
   anchorProps?: AnchorHTMLAttributes<HTMLAnchorElement>;
   borderless?: boolean;
-};
+}

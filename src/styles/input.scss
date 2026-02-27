@@ -37,7 +37,7 @@
     width: 100%;
 
     &::placeholder {
-      color: var(--stc-disabled-text-color);
+      color: var(--stc-input--disabled-text-color);
       opacity: 0.75;
       font-size: var(--stc-font-size-m);
     }
@@ -51,14 +51,14 @@
     &:focus,
     &:focus-within {
       border-color: var(--stc-primary-color);
-      box-shadow: var(--stc-box-shadow);
+      box-shadow: var(--stc-input--box-shadow);
     }
 
     /* Disabled */
     &:disabled {
-      background-color: var(--stc-disabled-bg-color);
+      background-color: var(--stc-input--disabled-bg-color);
       border-color: var(--stc-secondary-color);
-      color: var(--stc-disabled-text-color);
+      color: var(--stc-input--disabled-text-color);
       cursor: not-allowed;
     }
 

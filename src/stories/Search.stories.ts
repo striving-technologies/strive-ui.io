@@ -39,13 +39,13 @@ const meta = {
       control: "text",
       description: "Custom content for search button",
     },
-    isPrimary: {
+    primary: {
       control: "boolean",
       description: "Primary search button",
     },
-    noDivider: {
+    hideDivider: {
       control: "boolean",
-      description: "Remove the divider",
+      description: "Hide the divider",
     },
   },
 } satisfies Meta<typeof Search>;
