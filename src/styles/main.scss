@@ -8,36 +8,22 @@
 @import "select.scss"; /* Path: src/styles/selected.scss */
 @import "spinner.scss"; /* Path: src/styles/spinner.scss */
 
-/* Class Name philosophy */
-/* 
-  VARIABLES:
-  * - Variables are prefixed with --stc- (e.g., --stc-spacing-s, --stc-text-color).
-  * - Variables are defined in _settings.scss.
-  * - Variables are used to define colours, sizes, spacings, etc.
-  * - Variables are used in components and utilities to ensure consistency across the design system.
-  * - Variables can be overridden in the root or in specific components to customize the design system.
-  * - Variables can be used in media queries to create responsive designs.
-  * - Variables can be used in mixins to create reusable styles.
-
-  COMPONENT NAMING:
-  * - stc- prefix for Strive UI components.
-  * - stc-<component-name> denotes a component.
-  * - stc-<component-name>--<modifier> denotes a modifier of the component.
-  * - stc-<component-name>__<sub-component> denotes a sub-component of the component.
-  * - stc-<component-name>__<sub-component>--<modifier> denotes a sub-component with a modifier.
-    * - The modifier can be a state (e.g., active, disabled) or a variation (e.g., primary, secondary).
-  
-  UTILITY CLASSES:
-  * - Utility classes are prefixed with stc__ (e.g., stc__text-center, stc__hidden).
-  * - Variables are prefixed with --stc- (e.g., --stc-spacing-s, --stc-text-color).
-  * - Mixins are prefixed with stc__ (e.g., @include stc__button, @include stc__input).
-  * - Global variables are defined in _settings.scss.
-  * - Global utilities are defined in _utils.scss.
-  * - Icons are defined in _icons.scss.
-  * - All styles are imported in main.scss.
-    * - Styles can be imported independently in components if needed. This allows for tree-shaking and reduces bundle size.
-    * - When importing styles in components, use the full path to the file (e.g., @import "styles/button.scss") to ensure correct resolution. You will need to import utils and icons in other for components to work properly.
-*/
+/* Naming conventions (see docs/conventions.md for full details)
+ *
+ * CSS classes:   stc-<component>                        — block
+ *                stc-<component>-var--<value>            — variant modifier
+ *                stc-<component>-size--<value>           — size modifier
+ *                stc-<component>--<state>                — state modifier
+ *                stc-<component>__<element>              — sub-element
+ *                stc-<component>__<element>--<state>     — sub-element state
+ *
+ * Utilities:     stc-off-screen, stc-keyboard-focusable
+ * CSS variables: --stc-<name>           (defined in _settings.scss)
+ * SCSS mixins:   stc__<component-name>  (double underscore)
+ *
+ * Component styles can be imported independently for tree-shaking.
+ * When doing so, also import _utils.scss and _icons.scss.
+ */
 
 @mixin striveui {
   /* Utils */

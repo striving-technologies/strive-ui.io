@@ -77,4 +77,4 @@ You should now be able to import and use components as shown [above](#-usage).
 
 ## 🤝 Contribution
 
-There are tons of ways you can contribute, and we're happy to accept all. Please checkout our [guide to contributing here](https://github.com/Striving-Technologies/strive-ui.io/blob/main/.github/contributing.md). We can't wait to see what you've got for us.
+There are tons of ways you can contribute, and we're happy to accept all. Please checkout our [guide to contributing here](docs/contributing.md). For CSS naming conventions, component file structure, SCSS architecture, and theming details, see the [conventions & style guide](docs/conventions.md). We can't wait to see what you've got for us.
