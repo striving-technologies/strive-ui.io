@@ -10,7 +10,7 @@ export const formatCurrency = (
   const isNegative = value[0] === "-";
   const decimalLast = value[value.length - 1] === decimalSeparator;
 
-  const [integer, decimal] = value.split(".");
+  const [integer, decimal] = value.split(decimalSeparator);
 
   // Add thousand separator
   const formattedInteger = integer
@@ -24,7 +24,7 @@ export const formatCurrency = (
   const formattedCurrency = `${isNegative ? "-" : ""}${formattedInteger}${
     isNaN(parseInt(formattedDecimal))
       ? `${decimalLast ? decimalSeparator : ""}`
-      : `.${formattedDecimal.slice(0, decimalPlaces)}`
+      : `${decimalSeparator}${formattedDecimal.slice(0, decimalPlaces)}`
   }`;
 
   return formattedCurrency;
