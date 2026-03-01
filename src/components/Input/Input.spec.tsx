@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, act } from "@testing-library/react";
 import CurrencyInput from "./Currency";
 import Input from "./Input";
 
@@ -294,4 +294,122 @@ test("should not render step buttons when step property is not provided", () => 
 
   expect(updatedCurrencyInput).toBeInTheDocument();
   expect(updatedCurrencyButtons.length).toBe(2);
+});
+
+// CurrencyInput locale and controlled behavior tests
+describe("CurrencyInput locale and controlled behavior", () => {
+  test("should format correctly with European separators (thousandSeparator='.', decimalSeparator=',')", () => {
+    const onChange = jest.fn();
+
+    render(
+      <CurrencyInput
+        placeholder="Enter amount..."
+        thousandSeparator="."
+        decimalSeparator=","
+        onCurrencyChange={onChange}
+      />
+    );
+
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "1.000" } });
+
+    expect(input).toHaveValue("1.000");
+    expect(onChange).toHaveBeenCalledWith(1000);
+
+    fireEvent.change(input, { target: { value: "1.000,50" } });
+
+    expect(input).toHaveValue("1.000,50");
+    expect(onChange).toHaveBeenCalledWith(1000.5);
+  });
+
+  test("should sync controlled value when prop changes", () => {
+    const onChange = jest.fn();
+
+    const { rerender } = render(
+      <CurrencyInput
+        placeholder="Enter amount..."
+        value={100}
+        onCurrencyChange={onChange}
+      />
+    );
+
+    const input = screen.getByRole("textbox");
+
+    expect(input).toHaveValue("100");
+
+    rerender(
+      <CurrencyInput
+        placeholder="Enter amount..."
+        value={200}
+        onCurrencyChange={onChange}
+      />
+    );
+
+    expect(input).toHaveValue("200");
+
+    rerender(
+      <CurrencyInput
+        placeholder="Enter amount..."
+        value={1500}
+        onCurrencyChange={onChange}
+      />
+    );
+
+    expect(input).toHaveValue("1,500");
+  });
+
+  test("should report undefined when input is cleared", () => {
+    const onChange = jest.fn();
+
+    render(
+      <CurrencyInput
+        placeholder="Enter amount..."
+        onCurrencyChange={onChange}
+      />
+    );
+
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "1,000" } });
+
+    expect(onChange).toHaveBeenCalledWith(1000);
+
+    fireEvent.change(input, { target: { value: "" } });
+
+    expect(onChange).toHaveBeenCalledWith(undefined);
+  });
+
+  test("should format step buttons correctly with European separators", () => {
+    const onChange = jest.fn();
+
+    render(
+      <CurrencyInput
+        placeholder="Enter amount..."
+        thousandSeparator="."
+        decimalSeparator=","
+        step={500}
+        onCurrencyChange={onChange}
+      />
+    );
+
+    const input = screen.getByRole("textbox");
+    const buttons = screen.getAllByRole("button");
+    const [stepUp] = buttons;
+
+    fireEvent.click(stepUp);
+
+    expect(input).toHaveValue("500");
+    expect(onChange).toHaveBeenCalledWith(500);
+
+    fireEvent.click(stepUp);
+
+    expect(input).toHaveValue("1.000");
+    expect(onChange).toHaveBeenCalledWith(1000);
+
+    fireEvent.click(stepUp);
+
+    expect(input).toHaveValue("1.500");
+    expect(onChange).toHaveBeenCalledWith(1500);
+  });
 });
