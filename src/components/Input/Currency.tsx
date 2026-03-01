@@ -1,9 +1,10 @@
-import { ChangeEvent, useRef, useState } from "react";
-import { flushSync } from "react-dom";
+import { ChangeEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { convertToNumber, formatCurrency } from "./_currency";
 import { InputContext } from "./_shared";
 import Input from "./Input";
 import { CurrencyInputProps, InputType } from "./Input.types";
+
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export default function CurrencyInput({
   thousandSeparator = ",",
@@ -11,22 +12,40 @@ export default function CurrencyInput({
   decimalPlaces = 2,
   onCurrencyChange,
   value,
+  defaultValue,
   ...rest
 }: CurrencyInputProps) {
-  const [valFormatted, setValFormatted] = useState<string | undefined>(
-    value !== undefined
+  const [valFormatted, setValFormatted] = useState<string | undefined>(() => {
+    const initial = value ?? defaultValue;
+    return initial !== undefined
       ? formatCurrency(
-          `${value}`,
+          `${initial}`,
           decimalSeparator,
           thousandSeparator,
           decimalPlaces
         )
-      : undefined
-  );
+      : undefined;
+  });
 
-  const currencyRegex = new RegExp(
-    `[^0-9\\-${thousandSeparator}${decimalSeparator}]*`,
-    "g"
+  // Sync controlled value prop into internal state
+  useEffect(() => {
+    if (value === undefined) return;
+    const formatted = formatCurrency(
+      `${value}`,
+      decimalSeparator,
+      thousandSeparator,
+      decimalPlaces
+    );
+    setValFormatted((prev) => (prev !== formatted ? formatted : prev));
+  }, [value, decimalSeparator, thousandSeparator, decimalPlaces]);
+
+  const currencyRegex = useMemo(
+    () =>
+      new RegExp(
+        `[^0-9\\-${escapeRegex(thousandSeparator)}${escapeRegex(decimalSeparator)}]*`,
+        "g"
+      ),
+    [thousandSeparator, decimalSeparator]
   );
 
   // Record the position of the cursor before and after the change
@@ -35,11 +54,19 @@ export default function CurrencyInput({
     beforeEnd: 0,
   });
 
-  // Record the number of commas in the formatted currency
+  // Record the number of separators in the formatted currency
   // to determine the cursor position
-  const numberOfCommas = useRef(0);
+  const numberOfSeparators = useRef(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Restore cursor position after valFormatted updates
+  useLayoutEffect(() => {
+    inputRef.current?.setSelectionRange(
+      position.current.beforeStart,
+      position.current.beforeEnd
+    );
+  }, [valFormatted]);
 
   // Handle the currency input
   const handleCurrency = (event: ChangeEvent<HTMLInputElement>) => {
@@ -68,52 +95,42 @@ export default function CurrencyInput({
         )
       : "";
 
-    // Determine if the number of commas has increased or decreased
-    const newNumOfCommas = formattedCurrency.split(",").length - 1;
+    // Determine if the number of separators has increased or decreased
+    const newNumOfSeparators = formattedCurrency.split(thousandSeparator).length - 1;
 
-    // Update the cursor position based on the change in commas
-    if (newNumOfCommas > numberOfCommas.current) {
-      // If the number of commas has increased, move the cursor to the right
+    // Update the cursor position based on the change in separators
+    if (newNumOfSeparators > numberOfSeparators.current) {
       position.current = {
         beforeStart: (beforeStart || 0) + 1,
         beforeEnd: (beforeEnd || 0) + 1,
       };
-    } else if (newNumOfCommas < numberOfCommas.current) {
-      // If the number of commas has decreased, move the cursor to the left
+    } else if (newNumOfSeparators < numberOfSeparators.current) {
       position.current = {
         beforeStart: (beforeStart || 0) - 1,
         beforeEnd: (beforeEnd || 0) - 1,
       };
     } else {
-      // If the number of commas has not changed, keep the cursor position
       position.current = {
         beforeStart: beforeStart || 0,
         beforeEnd: beforeEnd || 0,
       };
     }
 
-    // Update the number of commas
-    numberOfCommas.current = newNumOfCommas;
-    // Update the formatted currency value
-    flushSync(() => {
-      setValFormatted(formattedCurrency != "" ? `${formattedCurrency}` : "");
-    });
+    // Update the number of separators
+    numberOfSeparators.current = newNumOfSeparators;
 
-    // Set the cursor position after the change
-    inputRef.current?.setSelectionRange(
-      position.current.beforeStart,
-      position.current.beforeEnd
-    );
+    // Update the formatted currency value
+    setValFormatted(formattedCurrency !== "" ? `${formattedCurrency}` : "");
 
     // Call the onCurrencyChange callback
-    onCurrencyChange(numberValue ? numberValue : 0);
+    onCurrencyChange(numberValue);
   };
 
   const currencyProps = {
     type: "text" as InputType,
     value: valFormatted,
     onChange: handleCurrency,
-    inputRef: inputRef,
+    ref: inputRef,
   };
 
   // Handle the step buttons for currency input
@@ -166,13 +183,11 @@ export default function CurrencyInput({
   };
 
   return (
-    <>
-      <InputContext.Provider value={{ isCurrency: true, emitStep: handleStep }}>
-        <Input
-          {...rest}
-          {...currencyProps}
-        />
-      </InputContext.Provider>
-    </>
+    <InputContext.Provider value={{ isCurrency: true, emitStep: handleStep, inputRef }}>
+      <Input
+        {...rest}
+        {...currencyProps}
+      />
+    </InputContext.Provider>
   );
 }
