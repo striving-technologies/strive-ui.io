@@ -13,3 +13,9 @@ debug.log
 
 # Test files
 coverage
+
+# Local Claude Code personal settings (shared config is committed)
+.claude/settings.local.json
+
+# Disposable per-issue worktrees created by the SDLC agent runner
+.agent-worktrees/
