@@ -1,0 +1,15 @@
+# Runs strive-agent-runner-oneshot.service on a schedule. Pair with the oneshot unit
+# (NOT with the watch daemon — use one approach or the other). See scripts/systemd/README.md.
+
+[Unit]
+Description=Schedule the StriveUI SDLC agent runner drain
+
+[Timer]
+# First run 2 min after boot/login, then every 15 min while active.
+OnBootSec=2min
+OnUnitActiveSec=15min
+# Catch up on a missed run (e.g. machine was asleep).
+Persistent=true
+
+[Install]
+WantedBy=timers.target
