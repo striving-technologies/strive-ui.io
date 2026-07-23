@@ -1,0 +1,16 @@
+# Alternative to the watch daemon: a oneshot that drains all `agent-ready` issues once and exits.
+# Driven on a schedule by strive-agent-runner.timer. Use this if you prefer no long-lived process.
+#
+# Edit the two REPLACE_WITH_REPO_PATH lines to your clone's absolute path before installing.
+
+[Unit]
+Description=StriveUI SDLC agent runner (drain once)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=REPLACE_WITH_REPO_PATH
+EnvironmentFile=REPLACE_WITH_REPO_PATH/scripts/systemd/agent-runner.env
+ExecStart=REPLACE_WITH_REPO_PATH/scripts/agent-runner.sh --all
+Nice=10

@@ -19,3 +19,6 @@ coverage
 
 # Disposable per-issue worktrees created by the SDLC agent runner
 .agent-worktrees/
+
+# Local runner secrets/config for the systemd/cron units (holds the OAuth token)
+scripts/systemd/agent-runner.env

@@ -1,0 +1,22 @@
+# Long-running watcher: continuously polls for `agent-ready` issues and runs the SDLC flow.
+# Primary option. Install as a user service — see scripts/systemd/README.md.
+#
+# Edit the two REPLACE_WITH_REPO_PATH lines to your clone's absolute path before installing.
+
+[Unit]
+Description=StriveUI SDLC agent runner (watch daemon)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=REPLACE_WITH_REPO_PATH
+EnvironmentFile=REPLACE_WITH_REPO_PATH/scripts/systemd/agent-runner.env
+ExecStart=REPLACE_WITH_REPO_PATH/scripts/agent-runner.sh --watch 300
+Restart=on-failure
+RestartSec=30
+# The runner isolates each issue in a disposable worktree; give it room but not the whole box.
+Nice=10
+
+[Install]
+WantedBy=default.target
