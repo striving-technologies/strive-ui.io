@@ -12,12 +12,18 @@ The runner still respects every guardrail — disposable per-issue worktrees, th
 cd <your clone of strive-ui.io>
 cp scripts/systemd/agent-runner.env.example scripts/systemd/agent-runner.env
 chmod 600 scripts/systemd/agent-runner.env
-$EDITOR scripts/systemd/agent-runner.env   # set CLAUDE_CODE_OAUTH_TOKEN + PATH
+$EDITOR scripts/systemd/agent-runner.env   # set PATH (token usually not needed — see below)
 ```
 
-- `CLAUDE_CODE_OAUTH_TOKEN` comes from `claude setup-token` (Claude Pro/Max).
+- **Auth — usually nothing to do.** If you've already logged in with `claude` as this user, it's
+  stored in `~/.claude/.credentials.json` (mode 600, auto-refreshed) and a **user** systemd service
+  reuses it. Leave `CLAUDE_CODE_OAUTH_TOKEN` unset. Only set it (from `claude setup-token`) on a
+  machine with no interactive login — CI, a container, or a different service user. Verify your
+  headless auth works with: `env -i HOME="$HOME" PATH="$PATH" claude -p "say hi"`.
 - `PATH` **matters**: services start with a minimal PATH. Run `which claude gh yarn git node` and make
   sure every one of those dirs is in the `PATH=` line. The `agent-runner.env` file is gitignored.
+- Use the **`systemctl --user`** units below (not a system-level unit) so the runner runs as you and
+  can read `~/.claude`.
 
 ## A. systemd user service (recommended)
 
