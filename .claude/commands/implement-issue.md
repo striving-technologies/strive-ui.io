@@ -32,7 +32,8 @@ plan to a review-ready pull request by delegating to the `planner`, `engineer`, 
    - Push the branch: `git push -u origin <branch>`.
    - Create a **non-draft** PR filling `.github/pull_request_template.md`: Description from the plan,
      QA section from QA's summary, `Closes #$ARGUMENTS`, and a "Deferred sub-tasks" note if the
-     planner deferred any. Add `--reviewer "$AGENT_PR_REVIEWER"` only if that value is non-empty.
+     planner deferred any. Always add `--label agent-pr` (the runner counts these to cap how many
+     flow PRs stay open at once). Add `--reviewer "$AGENT_PR_REVIEWER"` only if that value is non-empty.
    - Comment the PR link on the issue with `gh issue comment`.
 
 ## Guardrails
