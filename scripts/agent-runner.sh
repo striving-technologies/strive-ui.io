@@ -15,6 +15,9 @@
 #
 # Env:
 #   AGENT_CONCURRENCY   Max issues processed in parallel in --all/--watch (default 3)
+#   AGENT_MAX_OPEN_PRS  Cap on open SDLC PRs (labeled agent-pr) + in-flight issues (default 5).
+#                       New pickups pause once this many are awaiting review; an explicit
+#                       `<issue#>` run overrides the cap.
 #   AGENT_MAX_ITER      Max engineer↔QA iterations per issue before giving up (default 5)
 #   AGENT_PR_REVIEWER   GitHub login to request review from on the PR (optional)
 #   AGENT_YOLO=1        Skip permission prompts (--dangerously-skip-permissions). Safe-ish because
@@ -27,6 +30,7 @@ READY_LABEL="agent-ready"
 WIP_LABEL="agent-in-progress"
 DONE_LABEL="agent-done"
 FAIL_LABEL="agent-failed"
+PR_LABEL="agent-pr"
 BASE_BRANCH="main"
 
 REPO_ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")/.." rev-parse --show-toplevel)"
@@ -35,6 +39,7 @@ cd "$REPO_ROOT"
 WORKTREE_ROOT="${REPO_ROOT}/.agent-worktrees"
 LOG_DIR="${WORKTREE_ROOT}/logs"
 CONCURRENCY="${AGENT_CONCURRENCY:-3}"
+MAX_OPEN_PRS="${AGENT_MAX_OPEN_PRS:-5}"
 
 log() { printf '\033[1;34m[agent-runner]\033[0m %s\n' "$*"; }
 err() { printf '\033[1;31m[agent-runner]\033[0m %s\n' "$*" >&2; }
@@ -48,6 +53,15 @@ pick_next() {
     --jq "[.[] | select(([.labels[].name]
              | (index(\"$WIP_LABEL\") or index(\"$DONE_LABEL\") or index(\"$FAIL_LABEL\"))) | not)]
           | sort_by(.number) | .[0].number // empty"
+}
+
+# Backpressure: how much SDLC work is already awaiting review — open flow PRs (labeled agent-pr)
+# plus issues currently in flight (which will become PRs). Keeps open PRs from exceeding the cap.
+sdlc_active_count() {
+  local prs wip
+  prs="$(gh pr list --state open --label "$PR_LABEL" --json number --jq 'length' 2>/dev/null || echo 0)"
+  wip="$(gh issue list --state open --label "$WIP_LABEL" --json number --jq 'length' 2>/dev/null || echo 0)"
+  echo $(( prs + wip ))
 }
 
 # Claim the next issue by tagging it in-progress (so parallel schedulers don't double-pick it).
@@ -111,6 +125,10 @@ schedule() {
   log "Parallel scheduler: up to ${CONCURRENCY} concurrent issues (mode: ${mode})."
   while true; do
     while [ "$(count)" -lt "$CONCURRENCY" ]; do
+      if [ "$(sdlc_active_count)" -ge "$MAX_OPEN_PRS" ]; then
+        log "Cap reached: ${MAX_OPEN_PRS} SDLC PRs/in-flight open — pausing new pickups until some merge/close."
+        break
+      fi
       local n; n="$(claim_next)" || break
       launch "$n"
     done
@@ -131,10 +149,16 @@ case "${1:-}" in
   --watch) schedule watch "${2:-300}" ;;
   --all)   schedule once ;;
   "" )
+    if [ "$(sdlc_active_count)" -ge "$MAX_OPEN_PRS" ]; then
+      log "Cap reached: ${MAX_OPEN_PRS} open SDLC PRs/in-flight. Not picking up more (merge some first)."
+      exit 0
+    fi
     next="$(claim_next)" || { log "No open '${READY_LABEL}' issues to pick up."; exit 0; }
     process_issue "$next"
     ;;
   * )
+    [ "$(sdlc_active_count)" -ge "$MAX_OPEN_PRS" ] && \
+      log "Note: at/over the ${MAX_OPEN_PRS}-PR cap — running #$1 anyway as an explicit override."
     gh issue edit "$1" --add-label "$WIP_LABEL" >/dev/null 2>&1 || true
     process_issue "$1"
     ;;
