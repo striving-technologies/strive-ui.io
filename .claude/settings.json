@@ -1,0 +1,44 @@
+{
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git branch:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git push -u origin feat/*)",
+      "Bash(git push origin feat/*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue comment:*)",
+      "Bash(gh issue edit:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh label list:*)",
+      "Bash(yarn test)",
+      "Bash(yarn test:*)",
+      "Bash(yarn lint-ts)",
+      "Bash(yarn install:*)",
+      "Bash(yarn build:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)"
+    ],
+    "deny": [
+      "Bash(git push * main)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh release:*)",
+      "Bash(npm publish:*)",
+      "Bash(yarn publish:*)",
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf ~:*)"
+    ]
+  }
+}
