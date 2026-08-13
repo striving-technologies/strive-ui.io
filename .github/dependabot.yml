@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     # Cap concurrent version-update PRs (security updates are exempt from this limit).
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
