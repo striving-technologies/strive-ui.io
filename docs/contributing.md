@@ -31,6 +31,42 @@ In this guide we will provide you with all the relevant information for making c
 
 Read [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) guide before creating your first commit.
 
+#### Commit linting
+
+Commit messages are enforced with [commitlint](https://commitlint.js.org/), configured in
+`commitlint.config.js` against `@commitlint/config-conventional`. This is checked in two places:
+
+- **Locally**, via a husky `commit-msg` git hook (`.husky/commit-msg`). The hook is installed
+  automatically the first time you run `yarn install` (it runs the `prepare` script), so you don't
+  need to set anything up manually.
+- **In CI**, via the `commitlint` job in `.github/workflows/pr.yaml`, which lints every commit on a
+  pull request. Even if a local hook is bypassed (e.g. `--no-verify`), a non-conforming commit will
+  fail CI.
+
+Allowed commit types (from `@commitlint/config-conventional`): `feat`, `fix`, `docs`, `style`,
+`refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. The header (type + optional scope +
+subject) must also stay within **69 characters**, matching the subject-line limit above — this is
+enforced by the `header-max-length` rule in `commitlint.config.js`.
+
+#### Versioning & changelogs (Changesets)
+
+This repo uses [Changesets](https://github.com/changesets/changesets) to manage version bumps and
+`CHANGELOG.md` entries.
+
+- Whenever your PR includes a user-facing change (new component, behavior change, bug fix, etc.),
+  run `yarn changeset` and follow the prompts to describe the change and pick a bump type. Commit the
+  generated `.changeset/*.md` file alongside your code changes.
+- The package is still pre-1.0 (`0.1.0-alpha.x`), so per [0.x semver](https://semver.org/#spec-item-4)
+  conventions, breaking changes are recorded as **minor** or **patch** bumps rather than major —
+  there is no stable major version to protect yet.
+- Purely internal changes (tooling, CI, docs, tests) generally don't need a changeset unless they
+  affect what's published to npm.
+- `yarn version-packages` (`changeset version`) consumes pending changesets to bump the version and
+  update `CHANGELOG.md`. This is run by a maintainer, not on every PR.
+- **Publishing to npm is not yet automated.** There is no release workflow wired up (it needs an
+  `NPM_TOKEN` secret); for now a maintainer runs `yarn release` (`changeset publish`) manually once a
+  version bump has been merged.
+
 #### Making pull requests
 
 - Summarize your changes in the PR body. When in doubt, write a list things .
