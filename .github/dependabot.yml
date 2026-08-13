@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Cap concurrent version-update PRs (security updates are exempt from this limit).
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      # Bundle all Dependabot security fixes into a single PR.
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+      # Bundle all non-major version bumps into a single PR; majors stay separate for review.
+      npm-minor-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
