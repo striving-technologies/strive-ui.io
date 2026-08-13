@@ -19,5 +19,5 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "exclude": ["dist", "node_modules", "src/**/*.stories.ts"]
+  "exclude": ["dist", "node_modules", "src/**/*.stories.ts", "commitlint.config.js"]
 }

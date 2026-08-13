@@ -6,6 +6,7 @@
     "src/setupTest.ts",
     "src/**/*.stories.tsx",
     "src/**/*.spec.tsx",
-    "src/**/*.test.tsx"
+    "src/**/*.test.tsx",
+    "commitlint.config.js"
   ]
 }

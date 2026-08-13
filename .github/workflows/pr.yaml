@@ -31,3 +31,21 @@ jobs:
 
       - name: Lint TS
         run: yarn lint-ts
+
+  commitlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # fetch all history so commitlint can walk the PR range
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint commit messages
+        uses: wagoid/commitlint-github-action@v6
