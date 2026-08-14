@@ -6,6 +6,10 @@ Two ways to keep `scripts/agent-runner.sh` running without you: a **systemd user
 The runner still respects every guardrail — disposable per-issue worktrees, the 5-PR cap
 (`AGENT_MAX_OPEN_PRS`), no pushes to `main`, no auto-merge. Your only job stays reviewing the PRs it opens.
 
+Besides picking up `agent-ready` issues, the same runner also drains `agent-revise`-labeled PRs
+(review feedback on an already-open `agent-pr` PR) via `--feedback` mode — `--watch`/`--all` pick
+these up automatically alongside issues, interleaved ahead of new issue pickups.
+
 ## 0. One-time setup (both approaches)
 
 ```bash

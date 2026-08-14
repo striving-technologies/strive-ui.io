@@ -9,9 +9,21 @@
 # Usage:
 #   ./scripts/agent-runner.sh <issue#>     Run the SDLC flow for one specific issue (foreground)
 #   ./scripts/agent-runner.sh              Run the next open "agent-ready" issue (foreground)
-#   ./scripts/agent-runner.sh --all        Drain all "agent-ready" issues in parallel, then exit
+#   ./scripts/agent-runner.sh --feedback   Act on PR review feedback for the next open PR labeled
+#                                          "agent-revise" (foreground)
+#   ./scripts/agent-runner.sh --all        Drain all "agent-ready" issues AND "agent-revise" PRs in
+#                                          parallel, then exit
 #   ./scripts/agent-runner.sh --watch [s]  Poll every [s] seconds (default 300), keeping up to
-#                                          AGENT_CONCURRENCY issues in flight at once
+#                                          AGENT_CONCURRENCY issues/PRs in flight at once
+#
+# Labels:
+#   agent-ready / agent-in-progress / agent-done / agent-failed   issue pickup lifecycle (existing)
+#   agent-pr                                                      PR opened by the SDLC flow
+#   agent-revise                                                  maintainer trigger: act on review
+#                                                                  feedback for this already-open
+#                                                                  agent-pr PR
+#   agent-revise-in-progress                                      bot-applied claim label, prevents
+#                                                                  double-dispatch across runners
 #
 # Env:
 #   AGENT_CONCURRENCY   Max issues processed in parallel in --all/--watch (default 3)
@@ -31,6 +43,8 @@ WIP_LABEL="agent-in-progress"
 DONE_LABEL="agent-done"
 FAIL_LABEL="agent-failed"
 PR_LABEL="agent-pr"
+FEEDBACK_LABEL="agent-revise"
+FEEDBACK_WIP_LABEL="agent-revise-in-progress"
 BASE_BRANCH="main"
 
 REPO_ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")/.." rev-parse --show-toplevel)"
@@ -70,6 +84,56 @@ claim_next() {
   [ -z "$n" ] && return 1
   gh issue edit "$n" --add-label "$WIP_LABEL" >/dev/null 2>&1 || true
   echo "$n"
+}
+
+# Lowest-numbered open, same-repo PR labeled agent-revise that isn't already being worked on.
+pick_next_feedback() {
+  gh pr list --label "$FEEDBACK_LABEL" --state open --json number,labels,isCrossRepository \
+    --jq "[.[] | select((.isCrossRepository|not) and (([.labels[].name]|index(\"$FEEDBACK_WIP_LABEL\"))|not))]
+          | sort_by(.number) | .[0].number // empty"
+}
+
+# Claim the next feedback PR by tagging it in-progress (so parallel schedulers don't double-pick it).
+claim_next_feedback() {
+  local n; n="$(pick_next_feedback)"
+  [ -z "$n" ] && return 1
+  gh pr edit "$n" --add-label "$FEEDBACK_WIP_LABEL" >/dev/null 2>&1 || true
+  echo "$n"
+}
+
+# Full feedback-revision SDLC for one already-claimed PR, in a disposable worktree.
+# Safe to run in the background. On completion (success or failure) both labels are cleared —
+# a maintainer re-adds agent-revise to request another attempt.
+process_feedback() {
+  local pr="$1"
+  local branch worktree rc
+
+  branch="$(gh pr view "$pr" --json headRefName --jq '.headRefName')"
+  worktree="${WORKTREE_ROOT}/pr-${pr}-feedback"
+
+  log "PR #${pr} feedback → ${branch}"
+
+  git fetch origin "$branch" --quiet
+  git worktree remove "$worktree" --force >/dev/null 2>&1 || true
+  git worktree add -B "$branch" "$worktree" "origin/${branch}" >/dev/null
+
+  set +e
+  ( cd "$worktree" && \
+      AGENT_MAX_ITER="${AGENT_MAX_ITER:-5}" \
+      claude "${claude_flags[@]}" -p "/address-feedback ${pr}" )
+  rc=$?
+  set -e
+
+  git worktree remove "$worktree" --force >/dev/null 2>&1 || true
+  gh pr edit "$pr" --remove-label "$FEEDBACK_WIP_LABEL" --remove-label "$FEEDBACK_LABEL" \
+    >/dev/null 2>&1 || true
+
+  if [ "$rc" -eq 0 ]; then
+    log "PR #${pr} feedback addressed."
+  else
+    err "PR #${pr} feedback flow failed (exit ${rc})."
+  fi
+  return "$rc"
 }
 
 # Full SDLC for one already-claimed issue, in a disposable worktree. Safe to run in the background.
@@ -119,12 +183,26 @@ launch() {
   PIDS+=("$!")
 }
 
+launch_feedback() {
+  local pr="$1" logf="${LOG_DIR}/pr-${1}-feedback.log"
+  log "Launching feedback for PR #${pr} in parallel (log: ${logf})"
+  ( process_feedback "$pr" ) >"$logf" 2>&1 &
+  PIDS+=("$!")
+}
+
 schedule() {
   local mode="$1" interval="${2:-300}"
   mkdir -p "$LOG_DIR"
-  log "Parallel scheduler: up to ${CONCURRENCY} concurrent issues (mode: ${mode})."
+  log "Parallel scheduler: up to ${CONCURRENCY} concurrent issues/PRs (mode: ${mode})."
   while true; do
     while [ "$(count)" -lt "$CONCURRENCY" ]; do
+      # Feedback PRs are already-open agent-pr PRs being revised, not new ones, so they don't
+      # count against MAX_OPEN_PRS — drain them first.
+      local fn; fn="$(claim_next_feedback)" || fn=""
+      if [ -n "$fn" ]; then
+        launch_feedback "$fn"
+        continue
+      fi
       if [ "$(sdlc_active_count)" -ge "$MAX_OPEN_PRS" ]; then
         log "Cap reached: ${MAX_OPEN_PRS} SDLC PRs/in-flight open — pausing new pickups until some merge/close."
         break
@@ -133,10 +211,10 @@ schedule() {
       launch "$n"
     done
     if [ "$mode" = "once" ]; then
-      [ "$(count)" -eq 0 ] && [ -z "$(pick_next)" ] && break
+      [ "$(count)" -eq 0 ] && [ -z "$(pick_next)" ] && [ -z "$(pick_next_feedback)" ] && break
       sleep 3
     else
-      [ "$(count)" -eq 0 ] && log "No ready issues; waiting ${interval}s."
+      [ "$(count)" -eq 0 ] && log "No ready issues or feedback PRs; waiting ${interval}s."
       sleep "$interval"
     fi
   done
@@ -148,6 +226,10 @@ schedule() {
 case "${1:-}" in
   --watch) schedule watch "${2:-300}" ;;
   --all)   schedule once ;;
+  --feedback)
+    next="$(claim_next_feedback)" || { log "No open '${FEEDBACK_LABEL}' PRs to pick up."; exit 0; }
+    process_feedback "$next"
+    ;;
   "" )
     if [ "$(sdlc_active_count)" -ge "$MAX_OPEN_PRS" ]; then
       log "Cap reached: ${MAX_OPEN_PRS} open SDLC PRs/in-flight. Not picking up more (merge some first)."
