@@ -26,7 +26,8 @@ const Select = (props: SelectProps) => {
     ...(className && { [className]: true }),
   });
 
-  const componentId = rest.id || useMemo(() => generateRandomId("select-"), []);
+  const generatedId = useMemo(() => generateRandomId("select-"), []);
+  const componentId = rest.id || generatedId;
 
   // State variables using React hooks
   const [selectActive, setSelectActive] = useState(false);
