@@ -40,7 +40,7 @@ Build components that feel like **Ant Design × shadcn/ui, but written entirely 
 - **`docs/conventions.md`** — CSS/BEM naming, `classnames` pattern, component file structure,
   TypeScript conventions, SCSS mixin architecture, theming. **Authoritative.**
 - **`docs/contributing.md`** — branch prefixes (`feat/`, `bug/`, `doc/`, `mnt/` + optional issue
-  number), atomic conventional commits (imperative present tense, ≤69-char subject).
+  number), atomic conventional commits (imperative present tense, ≤72-char subject).
 
 ## Where things live
 
@@ -129,7 +129,7 @@ Rules:
 
 - **Never commit or push to `main`.** Always branch: `feat/<slug>` / `bug/<slug>` / `doc/<slug>` /
   `mnt/<slug>` (optionally `feat/123-<slug>` with the issue number).
-- **Conventional commits**, atomic, imperative present tense, subject ≤69 chars — e.g.
+- **Conventional commits**, atomic, imperative present tense, subject ≤72 chars — e.g.
   `feat(select): add keyboard navigation`. No "magic" issue-closing words inside commit messages.
 - **Do not add `Co-authored-by`, `Generated with`, or any similar trailer** to commit messages or
   PR bodies. (`.claude/settings.json` sets `includeCoAuthoredBy: false`; keep it that way.)
