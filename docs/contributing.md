@@ -34,7 +34,7 @@ Read [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) guid
 #### Commit linting
 
 Commit messages are enforced with [commitlint](https://commitlint.js.org/), configured in
-`commitlint.config.js` against `@commitlint/config-conventional`. This is checked in two places:
+`commitlint.config.mjs` against `@commitlint/config-conventional`. This is checked in two places:
 
 - **Locally**, via a husky `commit-msg` git hook (`.husky/commit-msg`). The hook is installed
   automatically the first time you run `yarn install` (it runs the `prepare` script), so you don't
@@ -46,7 +46,7 @@ Commit messages are enforced with [commitlint](https://commitlint.js.org/), conf
 Allowed commit types (from `@commitlint/config-conventional`): `feat`, `fix`, `docs`, `style`,
 `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. The header (type + optional scope +
 subject) must also stay within **72 characters**, matching the subject-line limit above — this is
-enforced by the `header-max-length` rule in `commitlint.config.js`.
+enforced by the `header-max-length` rule in `commitlint.config.mjs`.
 
 #### Versioning & changelogs (Changesets)
 
