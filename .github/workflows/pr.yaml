@@ -32,6 +32,18 @@ jobs:
       - name: Lint TS
         run: yarn lint-ts
 
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn lint
+
   commitlint:
     runs-on: ubuntu-latest
     # Dependabot's grouped commit messages exceed the header limit by design; don't lint bot commits.
