@@ -36,6 +36,13 @@ plan to a review-ready pull request by delegating to the `planner`, `engineer`, 
      flow PRs stay open at once). Add `--reviewer "$AGENT_PR_REVIEWER"` only if that value is non-empty.
    - Comment the PR link on the issue with `gh issue comment`.
 
+4. **Post the SDLC summary comment** — a *separate* comment (not the PR body), via `gh pr comment`:
+   - **Models**: which model each role used (read the `model:` frontmatter from
+     `.claude/agents/{planner,engineer,qa}.md`).
+   - **Breakdown**: how the planner sliced the work — what this PR delivers + anything deferred.
+   - **Loop**: how the engineer↔QA loop played out (number of iterations + final QA verdict).
+   Keep it high-level — a short summary for the reviewer, not a transcript.
+
 ## Guardrails
 - Never push or commit to `main`; never run `gh pr merge` (auto-merge is disabled by policy).
 - The existing "PR Check" CI workflow (`yarn test` + `yarn lint-ts`) is the automatic second gate on
