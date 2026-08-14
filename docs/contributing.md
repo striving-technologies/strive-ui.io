@@ -25,7 +25,7 @@ In this guide we will provide you with all the relevant information for making c
 #### Committing
 
 - Break your commits into logical atomic units. Well-segmented commits make it much easier for others to step through your changes.
-- Limit your subject line to 69 characters as GitHub will truncates subjects more than 70 characters.
+- Limit your subject line to 72 characters; GitHub truncates commit subjects longer than that in its UI.
 - Use imperative, present tense: "change" not "changed" nor "changes"
 - Don't use GitHub's magic words in your commits to close issues - do that in the pull request body instead.
 
@@ -45,7 +45,7 @@ Commit messages are enforced with [commitlint](https://commitlint.js.org/), conf
 
 Allowed commit types (from `@commitlint/config-conventional`): `feat`, `fix`, `docs`, `style`,
 `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. The header (type + optional scope +
-subject) must also stay within **69 characters**, matching the subject-line limit above — this is
+subject) must also stay within **72 characters**, matching the subject-line limit above — this is
 enforced by the `header-max-length` rule in `commitlint.config.js`.
 
 #### Versioning & changelogs (Changesets)
