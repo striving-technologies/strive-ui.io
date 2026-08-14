@@ -249,8 +249,6 @@ const Select = (props: SelectProps) => {
       setSearchValue("");
     }
 
-    console.log(selectValue);
-
     if (multiSelect) {
       if (onChange) onChange([]);
 
