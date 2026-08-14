@@ -453,6 +453,60 @@ describe("Select Component", () => {
         expect(selectedOption).toHaveAttribute("aria-selected", "true");
       });
     });
+
+    test("should use a generated id when no id prop is supplied", () => {
+      render(
+        <Select
+          options={mockOptions}
+          onChange={jest.fn()}
+        />
+      );
+
+      const combobox = screen.getByRole("combobox");
+      expect(combobox.id).toMatch(/^stc-select-/);
+      expect(combobox).toHaveAttribute(
+        "aria-controls",
+        `listbox-${combobox.id}`
+      );
+    });
+
+    test("should use the supplied id prop instead of generating one", () => {
+      render(
+        <Select
+          id="custom-select-id"
+          options={mockOptions}
+          onChange={jest.fn()}
+        />
+      );
+
+      const combobox = screen.getByRole("combobox");
+      expect(combobox).toHaveAttribute("id", "custom-select-id");
+      expect(combobox).toHaveAttribute(
+        "aria-controls",
+        "listbox-custom-select-id"
+      );
+    });
+
+    test("should keep the generated id stable across re-renders", () => {
+      const { rerender } = render(
+        <Select
+          options={mockOptions}
+          onChange={jest.fn()}
+        />
+      );
+
+      const initialId = screen.getByRole("combobox").id;
+
+      rerender(
+        <Select
+          options={mockOptions}
+          placeholder="changed"
+          onChange={jest.fn()}
+        />
+      );
+
+      expect(screen.getByRole("combobox").id).toBe(initialId);
+    });
   });
 
   describe("Edge Cases", () => {
