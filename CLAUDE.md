@@ -138,7 +138,10 @@ Rules:
 
 ## Known gaps (context, so agents don't trip on them)
 
-- ESLint 9 is installed but only a legacy `.eslintrc.json` exists and it isn't run in CI.
+- ESLint 9 flat config (`eslint.config.js`) runs in CI via `yarn lint`. It must stay at **0 errors**;
+  a handful of pre-existing violations are downgraded to `"warn"` and ticketed — the `jsx-a11y`
+  click/keyboard rules (`Select` combobox trigger + option `<li>`, `Input` focus wrapper) and the
+  `react-hooks` v7 React-Compiler-readiness rules. Fix them properly rather than adding new warnings.
 - No `prefers-reduced-motion` handling yet; some `--stc-*` tokens referenced in `select.scss` are
   undefined; `main.scss` has a stale path comment. Fix opportunistically when touching those files.
 - `Icon` fetches SVGs at runtime — prefer the inline React icons in `src/components/icons/`.
