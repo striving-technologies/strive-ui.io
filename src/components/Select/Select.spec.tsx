@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import Select from "./Select";
 
 const mockOptions = [
@@ -1058,6 +1059,209 @@ describe("Select Component", () => {
       fireEvent.click(combobox);
 
       expect(screen.getByRole("listbox")).toBeVisible();
+    });
+  });
+
+  describe("QA regression coverage", () => {
+    test("should not respond to keyboard events while disabled", async () => {
+      const user = userEvent.setup();
+      render(
+        <Select
+          options={mockOptions}
+          disabled
+          onChange={jest.fn()}
+        />
+      );
+
+      const combobox = screen.getByRole("combobox");
+      combobox.focus();
+      await user.keyboard("{Enter}");
+      await user.keyboard("{ArrowDown}");
+
+      expect(screen.queryByRole("listbox")).toBeNull();
+      expect(combobox).toHaveAttribute("aria-expanded", "false");
+    });
+
+    test("should not double-navigate when ArrowDown bubbles from the search input to the trigger", async () => {
+      const user = userEvent.setup();
+      render(
+        <Select
+          options={mockOptions}
+          searchable
+          onChange={jest.fn()}
+        />
+      );
+
+      const combobox = screen.getByRole("combobox");
+      fireEvent.click(combobox);
+
+      const searchInput = screen.getByRole("searchbox");
+      await waitFor(() => expect(searchInput).toHaveFocus());
+
+      // Opening already activates the first option; one ArrowDown press
+      // should move exactly one step, not two (which would happen if the
+      // bubbled keydown on the trigger were not ignored).
+      await user.keyboard("{ArrowDown}");
+
+      expect(searchInput).toHaveAttribute(
+        "aria-activedescendant",
+        expect.stringContaining("option2")
+      );
+    });
+
+    test("should close on Tab-away even when a clear button sits inside the trigger", async () => {
+      const user = userEvent.setup();
+      render(
+        <div>
+          <Select
+            options={mockOptions}
+            allowClear
+            value="option1"
+            onChange={jest.fn()}
+          />
+          <button type="button">Outside</button>
+        </div>
+      );
+
+      const combobox = screen.getByRole("combobox");
+      combobox.focus();
+      await user.keyboard("{Enter}");
+      expect(combobox).toHaveAttribute("aria-expanded", "true");
+
+      // Tab through the nested clear button and out of the widget entirely.
+      await user.tab();
+      await user.tab();
+
+      await waitFor(() => {
+        expect(combobox).toHaveAttribute("aria-expanded", "false");
+      });
+    });
+
+    test("should close on Tab-away even when multi-select tag remove buttons sit inside the trigger", async () => {
+      const user = userEvent.setup();
+      render(
+        <div>
+          <Select
+            options={mockOptions}
+            multiSelect
+            value={["option1", "option2"]}
+            onChange={jest.fn()}
+          />
+          <button type="button">Outside</button>
+        </div>
+      );
+
+      const combobox = screen.getByRole("combobox");
+      combobox.focus();
+      await user.keyboard("{Enter}");
+      expect(combobox).toHaveAttribute("aria-expanded", "true");
+
+      // Tab through both tag-remove buttons and out of the widget entirely.
+      await user.tab();
+      await user.tab();
+      await user.tab();
+
+      await waitFor(() => {
+        expect(combobox).toHaveAttribute("aria-expanded", "false");
+      });
+    });
+
+    test("should keep the active option in sync (not stale) after the filtered list shrinks", async () => {
+      const user = userEvent.setup();
+      render(
+        <Select
+          options={mockOptions}
+          searchable
+          onChange={jest.fn()}
+        />
+      );
+
+      const combobox = screen.getByRole("combobox");
+      fireEvent.click(combobox);
+
+      const searchInput = screen.getByRole("searchbox");
+      await waitFor(() => expect(searchInput).toHaveFocus());
+
+      // Move active index to the last of the 5 unfiltered options (banana).
+      await user.keyboard("{End}");
+      expect(searchInput).toHaveAttribute(
+        "aria-activedescendant",
+        expect.stringContaining("banana")
+      );
+
+      // Now filter down to a list where index 4 no longer exists.
+      await user.type(searchInput, "option");
+
+      await waitFor(() => {
+        expect(screen.queryByText("Banana")).not.toBeInTheDocument();
+      });
+
+      // activeIndex must have been reset to a valid entry in the new list,
+      // not left pointing at a stale/out-of-range index.
+      expect(searchInput).toHaveAttribute(
+        "aria-activedescendant",
+        expect.stringContaining("option1")
+      );
+
+      await user.keyboard("{Enter}");
+      expect(screen.queryByRole("listbox")).toBeNull();
+    });
+
+    test("should remain uncontrolled and update its own display when no value prop is supplied", async () => {
+      const user = userEvent.setup();
+      render(
+        <Select
+          options={mockOptions}
+          onChange={jest.fn()}
+        />
+      );
+
+      const combobox = screen.getByRole("combobox");
+      combobox.focus();
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{Enter}");
+
+      expect(
+        screen.getByText("Option 2", {
+          selector: '[class="stc-select__display-text"]',
+        })
+      ).toBeInTheDocument();
+    });
+
+    test("should reflect a controlled value update after selection without relying on internal state", async () => {
+      const onChange = jest.fn();
+      const ControlledSelect = () => {
+        const [value, setValue] = useState("option1");
+        return (
+          <Select
+            options={mockOptions}
+            value={value}
+            onChange={(v: string | string[]) => {
+              onChange(v);
+              setValue(v as string);
+            }}
+          />
+        );
+      };
+
+      const user = userEvent.setup();
+      render(<ControlledSelect />);
+
+      const combobox = screen.getByRole("combobox");
+      combobox.focus();
+      // Opening with a value already selected activates that option first;
+      // one further ArrowDown moves to the next option (option2).
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{Enter}");
+
+      expect(onChange).toHaveBeenCalledWith("option2");
+      expect(
+        screen.getByText("Option 2", {
+          selector: '[class="stc-select__display-text"]',
+        })
+      ).toBeInTheDocument();
     });
   });
 });
