@@ -292,6 +292,10 @@
         color: var(--stc-primary-color);
       }
 
+      &.stc-select__option--active {
+        background-color: rgba(var(--stc-primary-color--values), 0.12);
+      }
+
       &.stc-select__option--disabled {
         cursor: not-allowed;
         background-color: var(--stc-background-color--disabled);
